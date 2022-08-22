@@ -1,16 +1,22 @@
 package com.example.todoList.repository;
 
 import com.example.todoList.connection.ConnectionConst;
-import com.example.todoList.connection.DBConnectionUtil;
 import com.example.todoList.model.Member;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
 
 
+
 @Slf4j
+@RequiredArgsConstructor
 public class MemberRepository {
+
+    private final DataSource dataSource;
+
     public Member save(Member member) throws SQLException {
         String sql = "insert into Member(member_id, member_pw, name, age) values(?,?,?,?)";
 
@@ -18,7 +24,7 @@ public class MemberRepository {
         PreparedStatement pstmt = null;
 
         try {
-            con = DBConnectionUtil.getConnection();
+            con = getConnection();
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, member.getMemberId());
             pstmt.setString(2, member.getMemberPw());
@@ -43,27 +49,21 @@ public class MemberRepository {
         ResultSet rs = null;
 
         try{
-            con = DBConnectionUtil.getConnection();
+            con = getConnection();
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, memberId);
 
             rs = pstmt.executeQuery();
 
             if (rs.next()){
-//                Member member = new Member();
-//                String findMemberId = rs.getString("member_id");
-//                String findMemberPw = rs.getString("member_pw");
-//                String findMemberName = rs.getString("name");
-//                int findMemberAge = rs.getInt("age");
+                String findMemberId = rs.getString("member_id");
+                String findMemberPw = rs.getString("member_pw");
+                String findMemberName = rs.getString("name");
+                int findMemberAge = rs.getInt("age");
 
-                Member member = new Member();
-                member.setMemberId(rs.getString("member_id"));
-                member.setMemberPw(rs.getString("member_pw"));
-                member.setName(rs.getString("name"));
-                member.setAge(rs.getInt("age"));
+                Member member= new Member(findMemberId,findMemberPw,findMemberName,findMemberAge);
+
                 return member;
-                //Member findMember = new Member(findMemberId, findMemberPw, findMemberName, findMemberAge);
-                //return findMember;
             }
             else {
                 throw new NoSuchElementException("member not found memberId=" + memberId);
@@ -84,14 +84,14 @@ public class MemberRepository {
         PreparedStatement pstmt = null;
 
         try{
-            con = DBConnectionUtil.getConnection();
+            con = getConnection();
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, memberPw);
             pstmt.setString(2, memberId);
 
             int resultSize = pstmt.executeUpdate();
             log.info("resultSize={}", resultSize);
-
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             log.error("db error", e);
@@ -109,7 +109,7 @@ public class MemberRepository {
         PreparedStatement pstmt = null;
 
         try{
-            con = DBConnectionUtil.getConnection();
+            con = getConnection();
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, memberId);
 
@@ -125,8 +125,11 @@ public class MemberRepository {
 
     }
 
-
-
+    private Connection getConnection() throws SQLException {
+        Connection con = dataSource.getConnection();
+        log.info("get connection={}, class={}", con, con.getClass());
+        return con;
+    }
 
 
     private void close(Connection con, Statement stmt, ResultSet rs) {
