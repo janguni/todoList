@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 class MemberRepositoryTest {
 
     MemberRepository repository;
-    Member member = new Member("low9", "pwpw", "unijang", 24);
+    Member member = new Member("low9", "pwpw", "unijang", 24, 500);
 
     @BeforeEach
     void beforeEach(){
@@ -43,9 +43,14 @@ class MemberRepositoryTest {
         assertThat(findMember).isEqualTo(member);
 
         // update
-        repository.update(member.getMemberId(), "wpwp");
+        repository.updatePw(member.getMemberId(), "wpwp");
         Member findMember2 = repository.findById(member.getMemberId());
         assertThat(findMember2.getMemberPw()).isEqualTo("wpwp");
+
+        // update coin
+        repository.updateCoin(member.getMemberId(), 200);
+        Member findMember3 = repository.findById(member.getMemberId());
+        assertThat(findMember3.getCoin()).isEqualTo(200);
 
         repository.delete(member.getMemberId());
         Assertions.assertThatThrownBy(() -> repository.findById(member.getMemberId()))

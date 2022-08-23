@@ -16,17 +16,20 @@ public class Member {
     private String memberPw;
     private String name;
     private int age;
+
+    private int coin;
     //private Date dateJoined;
 
 
     public Member() {
     }
 
-    public Member(String memberId, String memberPw, String name, int age) {
+    public Member(String memberId, String memberPw, String name, int age, int coin) {
         this.memberId = memberId;
         this.memberPw = memberPw;
         this.name = name;
         this.age = age;
+        this.coin = coin;
     }
 
     public void changePw(String newPw){
