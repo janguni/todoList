@@ -1,11 +1,12 @@
 package com.example.todoList.repository;
 
-import com.example.todoList.connection.ConnectionConst;
+
 import com.example.todoList.model.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.stereotype.Repository;
+
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -112,8 +113,7 @@ public class MemberRepository {
             log.error("db error", e);
             throw e;
         } finally {
-            //close(con, pstmt, rs);
-            JdbcUtils.closeStatement(pstmt);
+            close(con, pstmt, rs);
         }
     }
 
@@ -159,8 +159,7 @@ public class MemberRepository {
             log.error("db error", e);
             throw e;
         } finally {
-            //close(con, pstmt, null);
-            JdbcUtils.closeStatement(pstmt);
+            close(con, pstmt, null);
         }
     }
 
@@ -236,36 +235,16 @@ public class MemberRepository {
     }
 
     private Connection getConnection() throws SQLException {
-        Connection con = dataSource.getConnection();
+        Connection con = DataSourceUtils.getConnection(dataSource);
         log.info("get connection={}, class={}", con, con.getClass());
         return con;
     }
 
 
     private void close(Connection con, Statement stmt, ResultSet rs) {
-
-        if (rs != null){
-            try{
-                rs.close();
-            } catch (SQLException e){
-                log.info("error", e);
-            }
-        }
-
-        if (stmt != null){
-            try{
-                stmt.close();
-            } catch (SQLException e){
-                log.info("error", e);
-            }
-        }
-
-        if (con != null){
-            try{
-                con.close();
-            } catch (SQLException e){
-                log.info("error", e);
-            }
-        }
+        JdbcUtils.closeResultSet(rs);
+        JdbcUtils.closeStatement(stmt);
+        DataSourceUtils.releaseConnection(con,dataSource);
     }
+
 }

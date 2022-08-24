@@ -8,31 +8,50 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static com.example.todoList.connection.ConnectionConst.*;
 import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
+@SpringBootTest
 class MemberServiceTest {
-
-    private MemberService memberService;
-    private MemberRepository memberRepository;
 
     public static final String MEMBER_A = "memberA";
     public static final String MEMBER_B = "memberB";
-
     public static final String SWINDLER = "Swindler";
 
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private MemberService memberService;
 
-    @BeforeEach
-    void before(){
-        //여기부터
-        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
-        memberRepository = new MemberRepository(dataSource);
-        memberService = new MemberService(memberRepository,dataSource);
+    @TestConfiguration
+    static class TestConfig{
+        private final DataSource dataSource;
+
+        public TestConfig(DataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        @Bean
+        MemberRepository memberRepository(){
+            return new MemberRepository(dataSource);
+        }
+        @Bean
+        MemberService memberService(){
+            return new MemberService(memberRepository());
+        }
     }
 
     @AfterEach
@@ -40,6 +59,14 @@ class MemberServiceTest {
         memberRepository.delete(MEMBER_A);
         memberRepository.delete(MEMBER_B);
         memberRepository.delete(SWINDLER);
+    }
+
+    @Test
+    void AopCheck(){
+        log.info("memberService class={}", memberService.getClass());
+        log.info("memberRepository class={}", memberRepository.getClass());
+        Assertions.assertThat(AopUtils.isAopProxy(memberService)).isTrue();
+        Assertions.assertThat(AopUtils.isAopProxy(memberRepository)).isFalse();
     }
 
     @Test

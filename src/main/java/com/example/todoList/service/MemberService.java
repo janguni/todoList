@@ -4,6 +4,11 @@ import com.example.todoList.model.Member;
 import com.example.todoList.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
+import org.springframework.transaction.support.TransactionTemplate;
 
 
 import javax.sql.DataSource;
@@ -16,33 +21,20 @@ import java.sql.SQLException;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final DataSource dataSource;
-
 
     // Coin 기부
+    @Transactional
     public void accountTransfer(String fromId, String toId, int coin) throws SQLException {
-        Connection con = dataSource.getConnection();
-        try{
-            con.setAutoCommit(false); // 트랜잭션 시작
-            bizLogic(fromId, toId, coin, con);
-            con.commit(); //성공시 커밋
-        } catch (Exception e){
-            con.rollback();
-            throw new IllegalStateException(e);
-        } finally {
-            con.setAutoCommit(true); // 다시 자동커밋으로 돌려놓기
-            con.close();
-        }
-
+        bizLogic(fromId, toId, coin);
     }
 
-    private void bizLogic(String fromId, String toId, int coin, Connection con) throws SQLException {
-        Member fromMember = memberRepository.findById(con, fromId);
-        Member toMember = memberRepository.findById(con, toId);
+    private void bizLogic(String fromId, String toId, int coin) throws SQLException {
+        Member fromMember = memberRepository.findById(fromId);
+        Member toMember = memberRepository.findById(toId);
 
-        memberRepository.updateCoin(con, fromId, fromMember.getCoin() - coin);
+        memberRepository.updateCoin(fromId, fromMember.getCoin() - coin);
         validation(toMember);
-        memberRepository.updateCoin(con, toId, toMember.getCoin() + coin);
+        memberRepository.updateCoin(toId, toMember.getCoin() + coin);
     }
 
     private void validation(Member toMember) {
