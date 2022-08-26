@@ -4,7 +4,6 @@ import com.example.todoList.model.Member;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,7 @@ import static org.assertj.core.api.Assertions.*;
 @Slf4j
 class MemberRepositoryTest {
 
-    MemberRepository repository;
+    MemberRepositoryImpl repository;
     Member member = new Member("low9", "pwpw", "unijang", 24, 500);
 
     @BeforeEach
@@ -28,7 +27,7 @@ class MemberRepositoryTest {
         dataSource.setJdbcUrl(URL);
         dataSource.setUsername(USERNAME);
         dataSource.setPassword(PASSWORD);
-        repository = new MemberRepository(dataSource);
+        repository = new MemberRepositoryImpl(dataSource);
     }
 
     @Test

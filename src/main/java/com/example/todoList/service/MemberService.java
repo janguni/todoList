@@ -2,17 +2,12 @@ package com.example.todoList.service;
 
 import com.example.todoList.model.Member;
 import com.example.todoList.repository.MemberRepository;
+import com.example.todoList.repository.MemberRepositoryImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
-import org.springframework.transaction.support.TransactionTemplate;
 
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 
@@ -28,7 +23,7 @@ public class MemberService {
         bizLogic(fromId, toId, coin);
     }
 
-    private void bizLogic(String fromId, String toId, int coin) throws SQLException {
+    private void bizLogic(String fromId, String toId, int coin){
         Member fromMember = memberRepository.findById(fromId);
         Member toMember = memberRepository.findById(toId);
 

@@ -1,26 +1,22 @@
 package com.example.todoList.service;
 
-import com.example.todoList.connection.ConnectionConst;
 import com.example.todoList.model.Member;
 import com.example.todoList.repository.MemberRepository;
+import com.example.todoList.repository.MemberRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
-import static com.example.todoList.connection.ConnectionConst.*;
 import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
@@ -46,7 +42,7 @@ class MemberServiceTest {
 
         @Bean
         MemberRepository memberRepository(){
-            return new MemberRepository(dataSource);
+            return new MemberRepositoryImpl(dataSource);
         }
         @Bean
         MemberService memberService(){
